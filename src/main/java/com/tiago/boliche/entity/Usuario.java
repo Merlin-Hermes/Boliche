@@ -1,5 +1,6 @@
 package com.tiago.boliche.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -31,6 +32,6 @@ public class Usuario {
     @Column(name = "NOME")
     private String nome;
 
-    @OneToMany(mappedBy = "usuario")
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Rodada> rodadas;
 }

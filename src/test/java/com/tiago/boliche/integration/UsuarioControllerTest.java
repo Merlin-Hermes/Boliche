@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tiago.boliche.entity.Frame;
 import com.tiago.boliche.entity.Rodada;
 import com.tiago.boliche.entity.Usuario;
+import com.tiago.boliche.model.usuario.UsuarioRequest;
 import com.tiago.boliche.model.usuario.UsuarioResponse;
-import com.tiago.boliche.repository.UsuarioRepository;
+import com.tiago.boliche.repository.rodada.RodadaRepository;
+import com.tiago.boliche.repository.usuario.UsuarioRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,8 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @Rollback
 @Transactional
@@ -35,6 +36,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 public class UsuarioControllerTest {
 
     private final String USUARIO_API = "/usuario";
+
+    @Autowired
+    RodadaRepository rodadaRepository;
 
     @SpyBean
     UsuarioRepository usuarioRepository;
@@ -61,7 +65,8 @@ public class UsuarioControllerTest {
 
         ResultActions result = mvc.perform(request);
 
-        final List<UsuarioResponse> response = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8), new TypeReference<List<UsuarioResponse>>() {});
+        final List<UsuarioResponse> response = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8), new TypeReference<List<UsuarioResponse>>() {
+        });
 
         Assertions.assertEquals(200, result.andReturn().getResponse().getStatus());
         Assertions.assertEquals("application/json", result.andReturn().getResponse().getContentType());
@@ -76,11 +81,58 @@ public class UsuarioControllerTest {
         MockHttpServletRequestBuilder request = post(USUARIO_API).contentType("application/json").content(objectMapper.writeValueAsString(usuario));
 
         ResultActions result = mvc.perform(request);
-        final UsuarioResponse response = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8), new TypeReference<UsuarioResponse>() {});
+        final UsuarioResponse response = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8), new TypeReference<UsuarioResponse>() {
+        });
 
         Assertions.assertEquals(200, result.andReturn().getResponse().getStatus());
         Assertions.assertEquals("application/json", result.andReturn().getResponse().getContentType());
         Assertions.assertEquals("Tiago", response.getNome());
+    }
+
+    @Test
+    public void test_adicionar_frame() throws Exception {
+
+        createUsuarioInicial();
+
+        var usuarioRequest = UsuarioRequest.builder()
+                .nome("Tiago")
+                .pontosPrimeiraJogada(10)
+                .strike(true)
+                .faltas(0)
+                .pontosSegundaJogada(8)
+                .pontosTerceiraJogada(5)
+                .rodada(1)
+                .spare(false)
+                .build();
+
+
+        MockHttpServletRequestBuilder request = put(USUARIO_API).contentType("application/json").content(objectMapper.writeValueAsString(usuarioRequest));
+
+        ResultActions result = mvc.perform(request);
+        final UsuarioResponse response = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8), new TypeReference<UsuarioResponse>() {
+        });
+
+        Assertions.assertEquals(200, result.andReturn().getResponse().getStatus());
+        Assertions.assertEquals("application/json", result.andReturn().getResponse().getContentType());
+        Assertions.assertEquals("Tiago", response.getNome());
+        Assertions.assertEquals(23, response.getRodadas().get(0).getPontos());
+    }
+
+    private void createUsuarioInicial() {
+        Usuario usuario = new Usuario();
+        usuario.setNome("Tiago");
+        usuario.setRodadas(createRodadasIniciais());
+        usuarioRepository.save(usuario);
+    }
+
+    private List<Rodada> createRodadasIniciais() {
+        List<Rodada> rodadas = new ArrayList<>();
+        for (int i = 0; i < 10; i++){
+            Rodada rodada = new Rodada();
+            rodada.setNumeroRodada(i + 1);
+            rodadas.add(rodada);
+        }
+        return rodadas;
     }
 
 
