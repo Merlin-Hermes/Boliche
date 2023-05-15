@@ -1,41 +1,36 @@
 package com.tiago.boliche.entity;
 
-
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Map;
+
 @Entity
-@Setter
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "FRAME")
-public class Frame {
+public class Jogador {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "PONTOS_PRIMEIRA_JOGADA")
-    private Integer pontosPrimeiraJogada;
+    @Column(name = "NOME")
+    private String nome;
 
-    @Column(name = "PONTOS_SEGUNDA_JOGADA")
-    private Integer pontosSegundaJogada;
+    @ManyToOne
+    private Partida partida;
 
-    @Column(name = "PONTOS_TERCEIRA_JOGADA")
-    private Integer pontosTerceiraJogada;
-
-    @Column(name = "PONTOS_QUARTA_JOGADA")
-    private Integer faltas;
-
-    @Column(name = "STRIKE")
-    private boolean strike;
+    @ElementCollection
+    private Map<Integer, Integer> frames;
 }
