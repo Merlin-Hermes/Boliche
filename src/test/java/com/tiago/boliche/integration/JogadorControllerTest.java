@@ -2,10 +2,10 @@ package com.tiago.boliche.integration;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tiago.boliche.model.partida.PartidaResponse;
+import com.tiago.boliche.entity.Jogador;
+import com.tiago.boliche.model.jogador.JogadorRequest;
+import com.tiago.boliche.model.jogador.JogadorResponse;
 import com.tiago.boliche.repository.jogador.JogadorRepository;
-import com.tiago.boliche.repository.partida.PartidaRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -20,25 +20,21 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 @Rollback
 @Transactional
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class PartidaControllerTest {
+public class JogadorControllerTest {
 
-    private final String PARTIDA_API = "/partida";
-
-    @Autowired
-    JogadorRepository jogadorRepository;
+    private final String API = "/jogador";
 
     @SpyBean
-    PartidaRepository partidaRepository;
+    JogadorRepository jogadorRepository;
 
     @Autowired
     protected MockMvc mvc;
@@ -48,25 +44,41 @@ public class PartidaControllerTest {
 
     @BeforeEach
     public void setUp() {
-        Mockito.reset(partidaRepository);
+        Mockito.reset(jogadorRepository);
     }
 
     @Test
-    public void Test_Criar_Partida() throws Exception {
+    public void Test_Marca_Ponto() throws Exception {
 
-        List<String> jogadores = new ArrayList<>();
-        jogadores.add("Tiago");
-        jogadores.add("João");
-        jogadores.add("Maria");
+        Jogador jogador = Jogador.builder()
+                .nome("Tiago")
+                .frames(CreateFrames())
+                .build();
 
-        MockHttpServletRequestBuilder request = post(PARTIDA_API).content(objectMapper.writeValueAsString(jogadores)).contentType("application/json");
+        jogadorRepository.save(jogador);
+
+        Map<Integer, Integer> frames = CreateFrames();
+        frames.put(1, 4);
+
+        JogadorRequest jogadorRequest = new JogadorRequest();
+        jogadorRequest.setId(jogador.getId());
+        jogadorRequest.setFrames(frames);
+
+        MockHttpServletRequestBuilder request = put(API).content(objectMapper.writeValueAsString(jogadorRequest)).contentType("application/json");
 
         ResultActions result = mvc.perform(request);
 
-        final PartidaResponse response = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8), new TypeReference<PartidaResponse>() {
+        final JogadorResponse response = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8), new TypeReference<JogadorResponse>() {
         });
+    }
 
-        Assertions.assertNotNull(response.getId());
+    private Map<Integer, Integer> CreateFrames() {
+        HashMap<Integer, Integer> frames = new HashMap<>();
+
+        for (int i = 1; i <= 10; i++) {
+            frames.put(i, 0);
+        }
+        return frames;
     }
 
 }
