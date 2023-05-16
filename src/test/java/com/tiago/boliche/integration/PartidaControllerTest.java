@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -58,35 +59,35 @@ public class PartidaControllerTest {
     }
 
     @Test
-    public void Test_Criar_Partida() throws Exception {
+    public void test_Criar_Partida() throws Exception {
 
         List<String> jogadores = new ArrayList<>();
         jogadores.add("Tiago");
         jogadores.add("João");
         jogadores.add("Maria");
 
-        MockHttpServletRequestBuilder request = post(PARTIDA_API).content(objectMapper.writeValueAsString(jogadores)).contentType("application/json");
+        MockHttpServletRequestBuilder request = post(PARTIDA_API).content(objectMapper.writeValueAsString(jogadores)).contentType(MediaType.APPLICATION_JSON);
 
         ResultActions result = mvc.perform(request);
 
-        final PartidaResponse response = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8), new TypeReference<PartidaResponse>() {
+        final PartidaResponse response = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8), new TypeReference<>() {
         });
 
         Assertions.assertNotNull(response.getId());
     }
 
     @Test
-    public void Test_Declarara_Vencedor() throws Exception {
+    public void test_Declarara_Vencedor() throws Exception {
         List<Jogador> jogadors = createJogador();
         Partida partida = new Partida();
         partida.setJogadores(jogadors);
         partidaRepository.save(partida);
 
-        MockHttpServletRequestBuilder request = get(PARTIDA_API + "/" + partida.getId()).contentType("application/json");
+        MockHttpServletRequestBuilder request = get(PARTIDA_API + "/" + partida.getId()).contentType(MediaType.APPLICATION_JSON);
 
         ResultActions result = mvc.perform(request);
 
-        final Resultado response = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8), new TypeReference<Resultado>() {
+        final Resultado response = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8), new TypeReference<>() {
         });
 
         Assertions.assertEquals("Jogador 0", response.getVencedor());
@@ -99,7 +100,7 @@ public class PartidaControllerTest {
 
         for (int i = 0; i < jogadores.size(); i++) {
             jogadores.get(i).setNome("Jogador " + i);
-            jogadores.get(i).setFrames(CreateFrames());
+            jogadores.get(i).setFrames(createFrames());
         }
         jogadores.set(0, marcaPonto1(jogadores.get(0)));
         jogadores.set(1, marcaPonto2(jogadores.get(1)));
@@ -126,7 +127,7 @@ public class PartidaControllerTest {
         return jogador;
     }
 
-    private Map<Integer, Frame> CreateFrames() {
+    private Map<Integer, Frame> createFrames() {
         var frames = new HashMap<Integer, Frame>();
 
         for (int i = 1; i <= 10; i++) {
