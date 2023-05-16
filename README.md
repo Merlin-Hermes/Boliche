@@ -8,6 +8,7 @@ Projeto pessoal de contagem de pontos de boliche.
 ## Como usar
  
 - Para rodar o projeto, basta clonar o repositório e abrir o postman.
+- Para marca os pontos você deve especificar o nome do jogador e a quantidade de pinos derrubados e qual frame ele está jogando.
 
 
 
@@ -23,8 +24,11 @@ Projeto pessoal de contagem de pontos de boliche.
 
 ## Endpoints
 
-Para criar um Usuario: 
- - POST: http://localhost:8080/usuario
+Para criar uma partida: 
+ - POST: http://localhost:8080/partida
 
-Para Buscar os Usuario: 
-- GET: http://localhost:8080/usuario/all
+Para buscar o vencedor: 
+- GET: http://localhost:8080/Partida
+
+Para marca pontos:
+- PUT: http://localhost:8080/jogador
