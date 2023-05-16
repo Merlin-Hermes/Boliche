@@ -44,10 +44,17 @@ public class PartidaService implements IPartidaService {
     public Resultado getVencedor(Long id) {
         Partida partida = partidaRepository.findById(id).orElseThrow();
         Resultado resultado = new Resultado();
-        partida.setJogadores(jogadorService.calcularPontos(partida.getJogadores()));
+        partida.setJogadores(calcularPontosAllJogadores(partida.getJogadores()));
         resultado.setVencedor(compararPontuacao(partida));
         resultado.setJogadores(partida.getJogadores());
         return resultado;
+    }
+
+    private List<Jogador> calcularPontosAllJogadores(List<Jogador> jogadores) {
+        for (Jogador jogador : jogadores) {
+          jogadorService.calcularPontos(jogador);
+        }
+        return jogadores;
     }
 
     private String compararPontuacao(Partida partida) {
