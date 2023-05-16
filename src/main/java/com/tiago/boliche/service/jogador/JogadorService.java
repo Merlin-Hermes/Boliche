@@ -45,6 +45,11 @@ public class JogadorService implements IJogadorService {
         return repository.save(jogador);
     }
 
+    @Override
+    public Jogador getPontuacao(Long id) {
+        return repository.findById(id).orElseThrow();
+    }
+
     private boolean isStrike(Map<Integer, Frame> frames, int i) {
         return frames.get(i).getPrimeiraBola() == 10;
     }

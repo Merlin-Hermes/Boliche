@@ -5,4 +5,6 @@ import com.tiago.boliche.model.jogador.JogadorRequest;
 
 public interface IJogadorService {
     Jogador marcarPonto(JogadorRequest jogadorRequest);
+
+    Jogador getPontuacao(Long id);
 }

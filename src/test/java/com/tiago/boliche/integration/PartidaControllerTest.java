@@ -107,15 +107,6 @@ public class PartidaControllerTest {
         return jogadores;
     }
 
-    private Jogador marcaPonto2(Jogador jogador) {
-        for (int i = 1; i <= 10; i++) {
-            jogador.getFrames().get(i).setPrimeiraBola(5);
-            jogador.getFrames().get(i).setSegundaBola(5);
-            jogador.getFrames().get(i).setTerceiraBola(9);
-        }
-        return jogador;
-    }
-
     private Jogador marcaPonto1(Jogador jogador) {
         for (int i = 1; i <= 10; i++) {
             jogador.getFrames().get(i).setPrimeiraBola(10);
@@ -124,7 +115,15 @@ public class PartidaControllerTest {
         }
 
         return jogador;
+    }
 
+    private Jogador marcaPonto2(Jogador jogador) {
+        for (int i = 1; i <= 10; i++) {
+            jogador.getFrames().get(i).setPrimeiraBola(5);
+            jogador.getFrames().get(i).setSegundaBola(5);
+            jogador.getFrames().get(i).setTerceiraBola(9);
+        }
+        return jogador;
     }
 
     private Map<Integer, Frame> CreateFrames() {

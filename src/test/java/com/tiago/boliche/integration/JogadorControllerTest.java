@@ -25,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 @Rollback
@@ -157,6 +158,28 @@ public class JogadorControllerTest {
         });
 
         Assertions.assertEquals(300, response.getPontuacao());
+    }
+
+    @Test
+    public void Test_Buscar_Pontuacao() throws Exception {
+        Map<Integer, Frame> frames = CreateFrames();
+        frames.put(1, new Frame(null, 10, 10, 10));
+        Jogador jogador = Jogador.builder()
+                .nome("Tiago")
+                .frames(frames)
+                .pontuacao(30)
+                .build();
+
+        jogadorRepository.save(jogador);
+
+        MockHttpServletRequestBuilder request = get(API + "/" + jogador.getId()).contentType("application/json");
+
+        ResultActions result = mvc.perform(request);
+
+        final JogadorResponse response = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8), new TypeReference<JogadorResponse>() {
+        });
+
+        Assertions.assertEquals(30, response.getPontuacao());
     }
 
     private Map<Integer, Frame> CreateFrames() {
