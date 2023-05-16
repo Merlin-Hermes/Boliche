@@ -1,8 +1,11 @@
 package com.tiago.boliche.service.partida;
 
+import com.tiago.boliche.entity.Frame;
 import com.tiago.boliche.entity.Jogador;
 import com.tiago.boliche.entity.Partida;
+import com.tiago.boliche.model.partida.Resultado;
 import com.tiago.boliche.repository.partida.PartidaRepository;
+import com.tiago.boliche.service.jogador.JogadorService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -15,8 +18,11 @@ public class PartidaService implements IPartidaService {
 
     private final PartidaRepository partidaRepository;
 
-    public PartidaService(PartidaRepository partidaRepository) {
+    private final JogadorService jogadorService;
+
+    public PartidaService(PartidaRepository partidaRepository, JogadorService jogadorService) {
         this.partidaRepository = partidaRepository;
+        this.jogadorService = jogadorService;
     }
 
     @Override
@@ -28,16 +34,30 @@ public class PartidaService implements IPartidaService {
             jogador.setNome(nome);
             jogador.setPartida(partida);
             jogador.setFrames(createFrames());
+            jogador.setPontuacao(0);
             jogadors.add(jogador);
         }
         partida.setJogadores(jogadors);
         return partidaRepository.save(partida);
     }
 
-    private Map<Integer, Integer> createFrames() {
-        HashMap<Integer, Integer> frames = new HashMap<>();
+    public Resultado getVencedor(Long id) {
+        Partida partida = partidaRepository.findById(id).orElseThrow();
+        Resultado resultado = new Resultado();
+        partida.setJogadores(jogadorService.calcularPontos(partida.getJogadores()));
+        resultado.setVencedor(compararPontuacao(partida));
+        resultado.setJogadores(partida.getJogadores());
+        return resultado;
+    }
+
+    private String compararPontuacao(Partida partida) {
+      return partida.getJogadores().stream().max((j1, j2) -> j1.getPontuacao() - j2.getPontuacao()).orElseThrow().getNome();
+    }
+
+    private Map<Integer, Frame> createFrames() {
+        HashMap<Integer, Frame> frames = new HashMap<>();
         for (int i = 1; i <= 10; i++) {
-            frames.put(i, 0);
+            frames.put(i, new Frame(null, 0, 0, 0));
         }
         return frames;
     }

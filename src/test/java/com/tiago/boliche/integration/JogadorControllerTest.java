@@ -2,10 +2,12 @@ package com.tiago.boliche.integration;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tiago.boliche.entity.Frame;
 import com.tiago.boliche.entity.Jogador;
 import com.tiago.boliche.model.jogador.JogadorRequest;
 import com.tiago.boliche.model.jogador.JogadorResponse;
 import com.tiago.boliche.repository.jogador.JogadorRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -57,8 +59,8 @@ public class JogadorControllerTest {
 
         jogadorRepository.save(jogador);
 
-        Map<Integer, Integer> frames = CreateFrames();
-        frames.put(1, 4);
+        Map<Integer, Frame> frames = CreateFrames();
+        frames.put(1, new Frame(null, 4, 0, 0));
 
         JogadorRequest jogadorRequest = new JogadorRequest();
         jogadorRequest.setId(jogador.getId());
@@ -70,13 +72,98 @@ public class JogadorControllerTest {
 
         final JogadorResponse response = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8), new TypeReference<JogadorResponse>() {
         });
+
+        Assertions.assertEquals(4, response.getFrames().get(1).getPrimeiraBola());
     }
 
-    private Map<Integer, Integer> CreateFrames() {
-        HashMap<Integer, Integer> frames = new HashMap<>();
+    @Test
+    public void Test_Marca_Strike() throws Exception {
+        Jogador jogador = Jogador.builder()
+                .nome("Tiago")
+                .frames(CreateFrames())
+                .build();
+
+        jogadorRepository.save(jogador);
+
+        Map<Integer, Frame> frames = CreateFrames();
+        frames.put(1, new Frame(null, 10, 0, 0));
+
+        JogadorRequest jogadorRequest = new JogadorRequest();
+        jogadorRequest.setId(jogador.getId());
+        jogadorRequest.setFrames(frames);
+
+        MockHttpServletRequestBuilder request = put(API).content(objectMapper.writeValueAsString(jogadorRequest)).contentType("application/json");
+
+        ResultActions result = mvc.perform(request);
+
+        final JogadorResponse response = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8), new TypeReference<JogadorResponse>() {
+        });
+
+        Assertions.assertEquals(10, response.getFrames().get(1).getPrimeiraBola());
+        Assertions.assertEquals(10, response.getPontuacao());
+    }
+
+    @Test
+    public void Test_Marca_Spare() throws Exception {
+        Jogador jogador = Jogador.builder()
+                .nome("Tiago")
+                .frames(CreateFrames())
+                .build();
+
+        jogadorRepository.save(jogador);
+
+        Map<Integer, Frame> frames = CreateFrames();
+        frames.put(1, new Frame(null, 5, 5, 6));
+
+        JogadorRequest jogadorRequest = new JogadorRequest();
+        jogadorRequest.setId(jogador.getId());
+        jogadorRequest.setFrames(frames);
+
+        MockHttpServletRequestBuilder request = put(API).content(objectMapper.writeValueAsString(jogadorRequest)).contentType("application/json");
+
+        ResultActions result = mvc.perform(request);
+
+        final JogadorResponse response = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8), new TypeReference<JogadorResponse>() {
+        });
+
+        Assertions.assertEquals(16, response.getPontuacao());
+
+    }
+
+    @Test
+    public void Test_Marca_Total() throws Exception {
+        Jogador jogador = Jogador.builder()
+                .nome("Tiago")
+                .frames(CreateFrames())
+                .build();
+
+        jogadorRepository.save(jogador);
+
+        Map<Integer, Frame> frames = CreateFrames();
+
+        for (int i = 1; i <= 10; i++){
+            frames.put(i, new Frame(null, 10, 10, 10));
+        }
+
+        JogadorRequest jogadorRequest = new JogadorRequest();
+        jogadorRequest.setId(jogador.getId());
+        jogadorRequest.setFrames(frames);
+
+        MockHttpServletRequestBuilder request = put(API).content(objectMapper.writeValueAsString(jogadorRequest)).contentType("application/json");
+
+        ResultActions result = mvc.perform(request);
+
+        final JogadorResponse response = objectMapper.readValue(result.andReturn().getResponse().getContentAsString(StandardCharsets.UTF_8), new TypeReference<JogadorResponse>() {
+        });
+
+        Assertions.assertEquals(300, response.getPontuacao());
+    }
+
+    private Map<Integer, Frame> CreateFrames() {
+        HashMap<Integer, Frame> frames = new HashMap<>();
 
         for (int i = 1; i <= 10; i++) {
-            frames.put(i, 0);
+            frames.put(i, new Frame(null, 0, 0, 0));
         }
         return frames;
     }

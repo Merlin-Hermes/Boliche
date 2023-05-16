@@ -1,5 +1,7 @@
 package com.tiago.boliche.model.jogador;
 
+import com.tiago.boliche.entity.Frame;
+import com.tiago.boliche.model.frame.FrameResponse;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,6 +17,8 @@ public class JogadorResponse {
 
     private String nome;
 
-    private Map<Integer, Integer> frames;
+    private Map<Integer, FrameResponse> frames;
+
+    private int pontuacao;
 
 }
